@@ -1,0 +1,15 @@
+{
+  /* Visit https://aka.ms/tsconfig to read more about this file */
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "ES2016",
+    "module": "NodeNext",
+    "moduleResolution": "nodeNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+
+  "exclude": [".yarn", "**/*.mjs"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "client",
+  "packageManager": "yarn@4.4.1",
+  "scripts": {
+    "i": "yarn install",
+    "b": "yarn build",
+    "t": "yarn g:test",
+    "l": "yarn g:lint .",
+    "build": "yarn g:build"
+  },
+  "devDependencies": {
+    "jest": "*",
+    "typescript": "*"
+  }
+}

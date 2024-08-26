@@ -1,0 +1,34 @@
+{
+  "name": "mern",
+  "packageManager": "yarn@4.4.1",
+  "workspaces": [
+    "packages/**/*"
+  ],
+  "scripts": {
+    "i": "yarn install",
+    "b": "yarn build",
+    "t": "yarn test",
+    "l": "yarn g:lint",
+    "build": "yarn workspaces foreach -Aptv run build",
+    "test": "yarn g:test",
+    "dev:add": "yarn add -D $@; yarn workspaces foreach --exclude . -Apv add -D $@'@*'",
+    "dev:rem": "yarn workspaces foreach --exclude . -Apv remove $@; yarn remove $@",
+    "g:build": "tsc",
+    "g:test": "jest --passWithNoTests",
+    "g:lint": "eslint --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/eslint__js": "^8.42.3",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "@typescript-eslint/parser": "^8.2.0",
+    "eslint": "^9.9.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jest": "^28.8.0",
+    "globals": "^15.9.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "8.2.0"
+  }
+}
