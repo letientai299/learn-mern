@@ -10,7 +10,7 @@ const configs = tslint.config(
   {
     // this much be in a different object rather than the above,
     // otherwise, those ignored files are still parsed and produce error.
-    ignores: [".yarn", "*.pnp.*"],
+    ignores: [".yarn", "*.pnp.*", "dist/"],
   },
 
   prettierConfig,
