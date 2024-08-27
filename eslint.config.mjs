@@ -1,10 +1,10 @@
 // @ts-check
 
-import eslint from "@eslint/js"
-import tslint from "typescript-eslint"
-import globals from "globals"
-import jestPlugin from "eslint-plugin-jest"
-import prettierConfig from "eslint-config-prettier"
+import eslint from "@eslint/js";
+import tslint from "typescript-eslint";
+import globals from "globals";
+import jestPlugin from "eslint-plugin-jest";
+import prettierConfig from "eslint-config-prettier";
 
 const configs = tslint.config(
   {
@@ -32,11 +32,17 @@ const configs = tslint.config(
       },
       parserOptions: {
         parser: tslint.parser,
-        projectService: {
-          allowDefaultProject: ["tsconfig.json"],
-        },
-        tsconfigRootDir: import.meta.dirname,
+        project: "tsconfig.json",
+        // NOTE: use process.cwd() instead of import meta.
+        // https://github.com/typescript-eslint/typescript-eslint/issues/9739#issuecomment-2294886918
+        // eslint-disable-next-line no-undef
+        tsconfigRootDir: process.cwd(),
+        // tsconfigRootDir: import.meta.dirname,
       },
+    },
+
+    rules: {
+      "arrow-body-style": ["error", "as-needed"],
     },
   },
 
@@ -48,9 +54,9 @@ const configs = tslint.config(
 
   {
     // enable jest rules on test files
-    files: ["**/test/**", "**/*.test.ts"],
+    files: ["**/test/**", "**/*.{test,spec}.ts"],
     ...jestPlugin.configs["flat/recommended"],
   },
-)
+);
 
-export default configs
+export default configs;
