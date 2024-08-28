@@ -1245,6 +1245,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/mongoose@npm:^5.11.97":
+  version: 5.11.97
+  resolution: "@types/mongoose@npm:5.11.97"
+  dependencies:
+    mongoose: "npm:*"
+  checksum: 10c0/333e692a39734948db700c76f25c7b088f46cb88ba940b80467313acf29752823ff9ed2870045c34e00559c38a4a3b5136ae6634da6dbe56c160a16a50e1dea0
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:*, @types/node@npm:^22.5.0":
   version: 22.5.0
   resolution: "@types/node@npm:22.5.0"
@@ -4534,7 +4543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mongoose@npm:^8.5.4":
+"mongoose@npm:*, mongoose@npm:^8.5.4":
   version: 8.5.4
   resolution: "mongoose@npm:8.5.4"
   dependencies:
@@ -5249,6 +5258,7 @@ __metadata:
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.21"
     "@types/mongodb": "npm:^4.0.7"
+    "@types/mongoose": "npm:^5.11.97"
     "@types/node": "npm:^22.5.0"
     "@types/winston": "npm:*"
     cors: "npm:^2.8.5"

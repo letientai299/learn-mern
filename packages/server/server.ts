@@ -8,8 +8,6 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 infra.setup(app);
 middlewares.setup(app);
-
-app.get('/', (req, res) => res.send('hello'));
-app.use('/records', routes.Records);
+routes.setup(app);
 
 app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));

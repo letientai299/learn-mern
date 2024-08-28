@@ -3,7 +3,6 @@ import cors from 'cors';
 
 import { ensureRequestId } from './request_id.js';
 import { httpLog } from './http_log.js';
-import { checkBody } from './check_body.js';
 
 function setup(app: express.Application) {
   app.disable('x-powered-by');
@@ -18,5 +17,4 @@ function setup(app: express.Application) {
 
 export default {
   setup,
-  checkBody,
 };

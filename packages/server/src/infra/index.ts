@@ -1,13 +1,18 @@
 import express from 'express';
-import db from './db.js';
 import winston from 'winston';
+import { connectDb } from './db.js';
 
-const ensureContext: express.Middleware = (req, res, next) => {
-  req.ctx = {
-    db: db,
-    lg: newLogger(),
+const ensureContext = (): express.Middleware => {
+  const lg = newLogger();
+  const ctx: App.Context = {
+    db: connectDb(lg),
+    lg: lg,
   };
-  next();
+
+  return (req, res, next) => {
+    req.ctx = ctx;
+    next();
+  };
 };
 
 const newLogger = () =>
@@ -16,7 +21,8 @@ const newLogger = () =>
     format: winston.format.combine(
       winston.format.timestamp(),
       winston.format.errors({ stack: true }),
-      winston.format.prettyPrint({ colorize: true }),
+      winston.format.prettyPrint({}),
+      winston.format.colorize({ all: true }),
     ),
     transports: [
       new winston.transports.Console({
@@ -26,7 +32,7 @@ const newLogger = () =>
   });
 
 const setup = (app: express.Application) => {
-  app.use(ensureContext);
+  app.use(ensureContext());
 };
 
 export default {

@@ -1,44 +1,40 @@
-import express, { RequestHandler } from 'express';
+import express from 'express';
 import { ObjectId } from 'mongodb';
 
-import { HttpErr, IRequest, IResponse } from '../utils/types.js';
-import mw from '../middlewares/index.js';
+import { IRequest, IResponse } from '../utils/types.js';
 import person, { Person, PersonInput } from '../models/person.js';
+import Index from '../validate/index.js';
+import { internalErr } from './err.js';
 
-const recordRoutes = express.Router();
+const routes = express.Router();
 
 // TODO (tai): make name unique, add some constraint, validation, type
 //  safety, ...
-const RECORD_COLLECTION = 'records';
+const COLLECTION = 'people';
 
-const validateId: RequestHandler = (req, res, next) =>
-  ObjectId.isValid(req.params.id)
-    ? next()
-    : res.status(400).send(`Invalid id ${req.params.id}`);
-
-recordRoutes.get('/', (req, res) => {
+routes.get('/', (req, res) => {
   req.ctx.db
-    .collection(RECORD_COLLECTION)
+    .collection(COLLECTION)
     .find()
     .toArray()
     .then((arr) => res.json(arr))
     .catch(internalErr(res));
 });
 
-recordRoutes.get('/:id', validateId, (req, res) => {
+routes.get('/:id', Index.Path.Params.ObjectId, (req, res) => {
   const id = req.params.id;
   req.ctx.db
-    .collection(RECORD_COLLECTION)
+    .collection(COLLECTION)
     .findOne({ _id: new ObjectId(id) })
     .then((obj) =>
-      obj ? res.json(obj) : res.status(404).send(`record ${id} not found`),
+      obj ? res.json(obj) : res.status(404).send(`Person with ${id} not found`),
     )
     .catch(internalErr(res));
 });
 
-recordRoutes.post(
+routes.post(
   '/',
-  mw.checkBody(person.Input),
+  Index.Body(person.Input),
   (req: IRequest<PersonInput>, res: IResponse<Person>) => {
     const obj = {
       name: req.body.name,
@@ -46,7 +42,7 @@ recordRoutes.post(
     };
 
     req.ctx.db
-      .collection(RECORD_COLLECTION)
+      .collection(COLLECTION)
       .insertOne(obj)
       .then((result) =>
         res.status(201).json({
@@ -62,10 +58,10 @@ recordRoutes.post(
   },
 );
 
-recordRoutes.patch(
+routes.patch(
   '/:id',
-  validateId,
-  mw.checkBody(person.Input),
+  Index.Path.Params.ObjectId,
+  Index.Body(person.Input),
   (req: IRequest<PersonInput>, res: IResponse<Person>) => {
     const query = { _id: new ObjectId(req.params.id) };
     const update = {
@@ -76,26 +72,19 @@ recordRoutes.patch(
     };
 
     req.ctx.db
-      .collection(RECORD_COLLECTION)
+      .collection(COLLECTION)
       .updateOne(query, update)
       .then(() => res.redirect(`/${req.params.id}`))
       .catch(internalErr(res));
   },
 );
 
-recordRoutes.delete('/:id', validateId, (req, res) => {
+routes.delete('/:id', Index.Path.Params.ObjectId, (req, res) => {
   req.ctx.db
-    .collection(RECORD_COLLECTION)
+    .collection(COLLECTION)
     .deleteOne({ _id: new ObjectId(req.params.id) })
-    .then(res.json)
+    .then(res.json.bind(res))
     .catch(internalErr(res));
 });
 
-const internalErr = (res: IResponse<HttpErr>) => (err: Error) => {
-  console.error(err);
-  res.status(500).send({
-    err: err,
-  });
-};
-
-export default recordRoutes;
+export default routes;
