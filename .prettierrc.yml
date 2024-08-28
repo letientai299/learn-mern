@@ -1,6 +1,5 @@
 printWidth: 80
 proseWrap: always
 semi: true
-singleQuote: false
+singleQuote: true
 bracketSpacing: true
-

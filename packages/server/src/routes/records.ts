@@ -1,91 +1,52 @@
-import express, { RequestHandler } from "express";
-import db from "../infra/db.js";
-import { ObjectId } from "mongodb";
+import express, { RequestHandler } from 'express';
+import { ObjectId } from 'mongodb';
 
-import { z, ZodSchema } from "zod";
-
-type IRequest<T> = express.Request<
-  Record<string, string>,
-  never,
-  T,
-  never,
-  express.Locals
->;
-type IResponse<T> = express.Response<T | HttpErr, express.Locals>;
-
-// TODO (tai): does zod has any way to deal with this linter rule?
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const httpErrSchema = z.object({
-  msg: z.string(),
-  err: z.object({}).optional(),
-  status: z.number().int().positive(),
-});
-
-type HttpErr = z.infer<typeof httpErrSchema>;
-
-const recordSchema = z.object({
-  _id: z.union([
-    z.string().optional().default(""),
-    z.custom<ObjectId>((v) => typeof v === "string" && ObjectId.isValid(v)),
-  ]),
-  name: z.string().min(1).max(10),
-  age: z.number().int().positive().max(100),
-  createAt: z.date(),
-});
-
-const recordRequestBodySchema = recordSchema.omit({
-  _id: true,
-  createAt: true,
-});
-
-type Person = z.infer<typeof recordSchema>;
-
-const checkBody =
-  (schema: ZodSchema) =>
-  (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const result = schema.safeParse(req.body);
-    return result.success
-      ? next()
-      : res.status(400).json({ err: result.error, data: result.data });
-  };
+import { HttpErr, IRequest, IResponse } from '../utils/types.js';
+import mw from '../middlewares/index.js';
+import person, { Person, PersonInput } from '../models/person.js';
 
 const recordRoutes = express.Router();
 
 // TODO (tai): make name unique, add some constraint, validation, type
 //  safety, ...
-const RECORD_COLLECTION = "records";
+const RECORD_COLLECTION = 'records';
 
 const validateId: RequestHandler = (req, res, next) =>
-  ObjectId.isValid(req.params.id) ? next() : res.status(400).send(`Invalid id`);
+  ObjectId.isValid(req.params.id)
+    ? next()
+    : res.status(400).send(`Invalid id ${req.params.id}`);
 
-recordRoutes.get("/", (_, res) => {
-  db.collection(RECORD_COLLECTION)
+recordRoutes.get('/', (req, res) => {
+  req.ctx.db
+    .collection(RECORD_COLLECTION)
     .find()
     .toArray()
     .then((arr) => res.json(arr))
-    .catch(sendInternalError(res));
+    .catch(internalErr(res));
 });
 
-recordRoutes.get("/:id", validateId, (req, res) => {
+recordRoutes.get('/:id', validateId, (req, res) => {
   const id = req.params.id;
-  db.collection(RECORD_COLLECTION)
+  req.ctx.db
+    .collection(RECORD_COLLECTION)
     .findOne({ _id: new ObjectId(id) })
     .then((obj) =>
       obj ? res.json(obj) : res.status(404).send(`record ${id} not found`),
     )
-    .catch(sendInternalError(res));
+    .catch(internalErr(res));
 });
 
 recordRoutes.post(
-  "/",
-  checkBody(recordRequestBodySchema),
-  (req: IRequest<Person>, res: IResponse<Person>) => {
+  '/',
+  mw.checkBody(person.Input),
+  (req: IRequest<PersonInput>, res: IResponse<Person>) => {
     const obj = {
       name: req.body.name,
       age: req.body.age,
     };
 
-    db.collection(RECORD_COLLECTION)
+    req.ctx.db
+      .collection(RECORD_COLLECTION)
       .insertOne(obj)
       .then((result) =>
         res.status(201).json({
@@ -97,15 +58,15 @@ recordRoutes.post(
           ...obj,
         }),
       )
-      .catch(sendInternalError(res));
+      .catch(internalErr(res));
   },
 );
 
 recordRoutes.patch(
-  "/:id",
+  '/:id',
   validateId,
-  checkBody(recordRequestBodySchema),
-  (req: IRequest<Person>, res: IResponse<Person>) => {
+  mw.checkBody(person.Input),
+  (req: IRequest<PersonInput>, res: IResponse<Person>) => {
     const query = { _id: new ObjectId(req.params.id) };
     const update = {
       $set: {
@@ -114,26 +75,26 @@ recordRoutes.patch(
       },
     };
 
-    db.collection(RECORD_COLLECTION)
+    req.ctx.db
+      .collection(RECORD_COLLECTION)
       .updateOne(query, update)
       .then(() => res.redirect(`/${req.params.id}`))
-      .catch(sendInternalError(res));
+      .catch(internalErr(res));
   },
 );
 
-recordRoutes.delete("/:id", validateId, (req, res) => {
-  db.collection(RECORD_COLLECTION)
+recordRoutes.delete('/:id', validateId, (req, res) => {
+  req.ctx.db
+    .collection(RECORD_COLLECTION)
     .deleteOne({ _id: new ObjectId(req.params.id) })
     .then(res.json)
-    .catch(sendInternalError(res));
+    .catch(internalErr(res));
 });
 
-const sendInternalError = (res: IResponse<HttpErr>) => (err: Error) => {
+const internalErr = (res: IResponse<HttpErr>) => (err: Error) => {
   console.error(err);
   res.status(500).send({
     err: err,
-    msg: "Internal server error",
-    status: 500,
   });
 };
 

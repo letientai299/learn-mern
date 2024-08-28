@@ -1,4 +1,4 @@
-import recordRoutes from "./records.js";
+import recordRoutes from './records.js';
 
 export default {
   Records: recordRoutes,
