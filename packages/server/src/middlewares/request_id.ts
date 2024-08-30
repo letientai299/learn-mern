@@ -1,12 +1,14 @@
 import type { NextFunction, Request, Response } from 'express';
-import { v7 as uuid } from 'uuid';
+import { customAlphabet } from 'nanoid';
+
+const nanoid = customAlphabet('1234567890abcdef');
 
 const X_REQUEST_ID = 'X-Request-Id';
 
 export function getRequestId(req: Request) {
   let reqID = req.get(X_REQUEST_ID);
   if (!reqID) {
-    reqID = uuid();
+    reqID = `rid_${nanoid()}`;
   }
   return reqID;
 }

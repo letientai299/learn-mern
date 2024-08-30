@@ -35,4 +35,4 @@ carSchema.pre('save', function (next) {
   return next();
 });
 
-export const Cars = mongoose.model('cars', carSchema);
+export const Cars = mongoose.model('cars', carSchema, 'cars', {});

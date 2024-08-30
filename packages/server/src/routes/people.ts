@@ -8,8 +8,6 @@ import { internalErr } from './err.js';
 
 const routes = express.Router();
 
-// TODO (tai): make name unique, add some constraint, validation, type
-//  safety, ...
 const COLLECTION = 'people';
 
 routes.get('/', (req, res) => {
@@ -46,9 +44,9 @@ routes.post(
       .insertOne(obj)
       .then((result) =>
         res.status(201).json({
-          // TODO (tai): currently, this is the only new part of the document.
-          //  so it's safe to return the full object this way. What if there's
-          //  some other DB generated values?
+          // NOTE: currently, this is the only new part of the document. so it's
+          //  safe to return the full object this way. What if there's some
+          //  other DB generated values?
           _id: result.insertedId,
           createAt: new Date(),
           ...obj,

@@ -1,18 +1,19 @@
 import express from 'express';
+import { createContext } from './context.js';
 import winston from 'winston';
 import { connectDb } from './db.js';
 
-const ensureContext = (): express.Middleware => {
+const setup = (app: express.Application) => {
   const lg = newLogger();
-  const ctx: App.Context = {
-    db: connectDb(lg),
+  const ctx = createContext({
     lg: lg,
-  };
+    db: connectDb(lg),
+  });
+  app.use(ctx);
+};
 
-  return (req, res, next) => {
-    req.ctx = ctx;
-    next();
-  };
+export default {
+  setup,
 };
 
 const newLogger = () =>
@@ -30,11 +31,3 @@ const newLogger = () =>
       }),
     ],
   });
-
-const setup = (app: express.Application) => {
-  app.use(ensureContext());
-};
-
-export default {
-  setup,
-};

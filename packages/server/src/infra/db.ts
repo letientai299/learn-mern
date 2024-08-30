@@ -1,16 +1,42 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import mongoose from 'mongoose';
 import winston from 'winston';
+import { ctxLg } from './context.js';
 
 const commonConnectOptions = {
   connectTimeoutMS: 1000,
   serverSelectionTimeoutMS: 1000,
 };
 
+function ctxLgOrElse(appLg: winston.Logger) {
+  const lg = ctxLg();
+  if (lg) {
+    return lg;
+  }
+
+  return appLg;
+}
+
+function configMongoose(appLg: winston.Logger) {
+  mongoose.set('debug', function (coll, method, ...args) {
+    const lg = ctxLgOrElse(appLg);
+    lg.debug({
+      collection: coll,
+      method: method,
+      args: args,
+    });
+  });
+
+  // make it easier to use transaction without passing session object
+  // in every db call.
+  // https://mongoosejs.com/docs/transactions.html#asynclocalstorage
+  mongoose.set('transactionAsyncLocalStorage', true);
+}
+
 function connectMongoose(uri: string, lg: winston.Logger) {
   mongoose
     .connect(uri, commonConnectOptions)
-    .then(() => lg.info('Mongoose connected'))
+    .then(() => configMongoose(lg))
     .catch((err) => {
       lg.error(`Mongoose failed to connect`);
       throw err;

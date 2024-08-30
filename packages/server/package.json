@@ -19,6 +19,7 @@
     "express": "^4.19.2",
     "mongodb": "^6.8.0",
     "mongoose": "^8.5.4",
+    "nanoid": "^5.0.7",
     "pretty-ms": "^9.1.0",
     "uuid": "*",
     "winston": "*"
